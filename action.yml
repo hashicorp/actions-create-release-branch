@@ -1,0 +1,62 @@
+name: 'Create release branch'
+description: 'Create a new release branch based off of version/VERSION and update base branch version'
+inputs:
+  token:
+    description: 'Elevated github repo token'
+    required: true
+outputs:
+  release-branch-name:
+    description: "The full name of the newly created release branch, i.e. release/1.0.x"
+    value: ${{ steps.set-release-branch-name-and-version.outputs.name }}
+runs:
+  using: "composite"
+  steps:
+    - name: Get current version
+      id: get-current-version
+      shell: bash
+      env:
+        VERSION_FILE: version/VERSION
+      run: |
+        test -f "${VERSION_FILE}" || \
+        { echo "File ${VERSION_FILE} is not present in this repo"; exit 1; }
+
+        version=$(cat ${VERSION_FILE})
+        test -n "${version}" || \
+        { echo "File ${VERSION_FILE} does not contain a version"; exit 1; }
+
+        echo "full=${version}" | tee -a "$GITHUB_OUTPUT"
+        echo "minor=${version%.*}" | tee -a "$GITHUB_OUTPUT"
+    - name: Set new release branch name and initial version
+      id: set-release-branch-name-and-version
+      shell: bash
+      run: |
+        echo "name=release/${{ steps.get-current-version.outputs.minor }}.x" | tee -a "$GITHUB_OUTPUT"
+        echo "version=${{ steps.get-current-version.outputs.minor }}.0" | tee -a "$GITHUB_OUTPUT"
+    - name: Create new release branch
+      id: create-release-branch
+      shell: bash
+      run: |
+        git ls-remote --heads --exit-code origin ${{ steps.set-release-branch-name-and-version.outputs.name }} || \
+        { \
+          git config --global user.name "Rel Eng team" ;
+          git config --global user.email "team-rel-eng@hashicorp.com" ;
+          git fetch origin && git checkout main ;
+          git checkout -B ${{ steps.set-release-branch-name-and-version.outputs.name }} ;
+          git push origin ${{ steps.set-release-branch-name-and-version.outputs.name }} ;
+          git checkout main ;
+        }
+    - uses: hashicorp/action-setup-bob@v1
+      with:
+        github-token: ${{ inputs.token }}
+    - name: bump version on base branch
+      env:
+        BOB_GITHUB_TOKEN: ${{ inputs.token }}
+      shell: bash
+      run: |
+        bob update version \
+        -bump minor \
+        -org ${{ github.repository_owner }} \
+        -repo $( echo ${{ github.repository }} | awk -F"/" '{ print $2 }') \
+        -branch main \
+        -version ${{ steps.set-release-branch-name-and-version.outputs.version }} \
+        -version-path version/VERSION
