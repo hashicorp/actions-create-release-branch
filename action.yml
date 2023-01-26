@@ -34,6 +34,7 @@ runs:
         echo "name=release/${{ steps.get-current-version.outputs.minor }}.x" | tee -a "$GITHUB_OUTPUT"
         echo "version=${{ steps.get-current-version.outputs.minor }}.0" | tee -a "$GITHUB_OUTPUT"
     - name: Check if release branch already exists
+      shell: bash
       run: |
         git ls-remote --heads --exit-code origin ${{ steps.set-release-branch-name-and-version.outputs.name }} && \
         { \
