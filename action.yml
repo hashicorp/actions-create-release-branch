@@ -36,7 +36,7 @@ runs:
     - name: Check if release branch already exists
       shell: bash
       run: |
-        git ls-remote --heads --exit-code origin ${{ steps.set-release-branch-name-and-version.outputs.name }} && \
+        test -z "$(git ls-remote --heads origin ${{ steps.set-release-branch-name-and-version.outputs.name }})" || \
         { \
           echo "Cannot create branch ${{ steps.set-release-branch-name-and-version.outputs.name }} because it already exists" ;
           echo "Please bump version file manually" ;
