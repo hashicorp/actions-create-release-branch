@@ -32,19 +32,24 @@ runs:
       run: |
         echo "name=release/${{ steps.get-current-version.outputs.minor }}.x" | tee -a "$GITHUB_OUTPUT"
         echo "version=${{ steps.get-current-version.outputs.minor }}.0" | tee -a "$GITHUB_OUTPUT"
+    - name: Check if release branch already exists
+      run: |
+        git ls-remote --heads --exit-code origin ${{ steps.set-release-branch-name-and-version.outputs.name }} && \
+        { \
+          echo "Cannot create branch ${{ steps.set-release-branch-name-and-version.outputs.name }} because it already exists" ;
+          echo "Please bump version file manually" ;
+          exit 1 ;
+        }
     - name: Create new release branch
       id: create-release-branch
       shell: bash
       run: |
-        git ls-remote --heads --exit-code origin ${{ steps.set-release-branch-name-and-version.outputs.name }} || \
-        { \
-          git config --global user.name "Rel Eng team" ;
-          git config --global user.email "team-rel-eng@hashicorp.com" ;
-          git fetch origin && git checkout main ;
-          git checkout -B ${{ steps.set-release-branch-name-and-version.outputs.name }} ;
-          git push origin ${{ steps.set-release-branch-name-and-version.outputs.name }} ;
-          git checkout main ;
-        }
+        git config --global user.name "Rel Eng team"
+        git config --global user.email "team-rel-eng@hashicorp.com"
+        git fetch origin && git checkout main
+        git checkout -B ${{ steps.set-release-branch-name-and-version.outputs.name }}
+        git push origin ${{ steps.set-release-branch-name-and-version.outputs.name }}
+        git checkout main
     - uses: hashicorp/action-setup-bob@v1
       with:
         github-token: ${{ inputs.token }}
