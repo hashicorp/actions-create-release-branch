@@ -16,10 +16,10 @@ _This is intended for internal HashiCorp use only_
         - workflow_dispatch
     jobs:
     create-branch:
-        runs-on: [linux, small]
+        runs-on: ubuntu-latest
         steps:
             - uses: actions/checkout@v3
-            - uses: hashicorp/actions-create-release-branch@v1
+            - uses: hashicorp/actions-create-release-branch@v2
                 with:
                 token: ${{ secrets.ELEVATED_GITHUB_TOKEN }}
     ```
