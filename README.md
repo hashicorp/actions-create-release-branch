@@ -19,7 +19,7 @@ _This is intended for internal HashiCorp use only_
         runs-on: ubuntu-latest
         steps:
             - uses: actions/checkout@v3
-            - uses: hashicorp/actions-create-release-branch@v2
+            - uses: hashicorp/actions-create-release-branch@v1
                 with:
                 token: ${{ secrets.ELEVATED_GITHUB_TOKEN }}
     ```
