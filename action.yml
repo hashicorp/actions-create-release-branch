@@ -25,7 +25,7 @@ runs:
         { echo "File ${VERSION_FILE} does not contain a version"; exit 1; }
 
         echo "full=${version}" | tee -a "$GITHUB_OUTPUT"
-        echo "minor=${version%.*}" | tee -a "$GITHUB_OUTPUT"
+        echo "minor=${version%!(BADPREC)%!}(MISSING)" | tee -a "$GITHUB_OUTPUT"
     - name: Set new release branch name and initial version
       id: set-release-branch-name-and-version
       shell: bash
