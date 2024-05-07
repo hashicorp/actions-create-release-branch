@@ -45,7 +45,7 @@ runs:
           git push origin ${{ steps.set-release-branch-name-and-version.outputs.name }} ;
           git checkout main ;
         }
-    - uses: hashicorp/action-setup-bob@v1
+    - uses: hashicorp/action-setup-bob@v2
       with:
         github-token: ${{ inputs.token }}
     - name: bump version on base branch
