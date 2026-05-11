@@ -1,3 +1,5 @@
+# Copyright IBM Corp. 2022, 2026
+
 name: 'Create release branch'
 description: 'Create a new release branch based off of version/VERSION and update base branch version'
 inputs:
